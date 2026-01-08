@@ -6,7 +6,6 @@
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
-const { v4: uuidv4 } = require('uuid');
 
 // Initialize AWS clients
 const sesClient = new SESClient({ region: process.env.AWS_REGION || 'us-east-1' });
@@ -25,9 +24,9 @@ exports.handler = async (event) => {
   console.log('Event received:', JSON.stringify(event, null, 2));
 
   try {
-    // Parse SNS message
+    // ✅ FIXED: Parse SNS message and extract the token sent by webapp
     const snsMessage = JSON.parse(event.Records[0].Sns.Message);
-    const { email, firstName, lastName } = snsMessage;
+    const { email, firstName, lastName, token } = snsMessage;
 
     console.log(`Processing verification email for: ${email}`);
 
@@ -41,9 +40,8 @@ exports.handler = async (event) => {
       };
     }
 
-    // Generate verification token
-    const token = uuidv4();
-    const verificationLink = `https://${DOMAIN}/v1/user/verify?email=${encodeURIComponent(email)}&token=${token}`;
+    // ✅ FIXED: Use HTTP instead of HTTPS, and use token from webapp (not generate new one)
+    const verificationLink = `http://${DOMAIN}/v1/user/verify?email=${encodeURIComponent(email)}&token=${token}`;
 
     // Send email via SES
     await sendVerificationEmail(email, firstName, verificationLink);
@@ -107,7 +105,7 @@ Thank you for creating an account. Please verify your email address by clicking 
 
 ${verificationLink}
 
-This link will expire in 1 minute.
+This link will expire in 10 minutes.
 
 If you did not create an account, please ignore this email.
 
@@ -143,7 +141,7 @@ CSYE6225 Team`,
     <a href="${verificationLink}" class="button">Verify Email</a>
     <p>Or copy and paste this link into your browser:</p>
     <p style="word-break: break-all; color: #007bff;">${verificationLink}</p>
-    <p><strong>This link will expire in 1 minute.</strong></p>
+    <p><strong>This link will expire in 10 minutes.</strong></p>
     <p>If you did not create an account, please ignore this email.</p>
     <div class="footer">
       <p>Best regards,<br>CSYE6225 Team</p>
