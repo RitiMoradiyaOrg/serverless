@@ -24,7 +24,7 @@ exports.handler = async (event) => {
   console.log('Event received:', JSON.stringify(event, null, 2));
 
   try {
-    // ✅ FIXED: Parse SNS message and extract the token sent by webapp
+    // Parse SNS message and extract the token sent by webapp
     const snsMessage = JSON.parse(event.Records[0].Sns.Message);
     const { email, firstName, lastName, token } = snsMessage;
 
@@ -40,7 +40,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // ✅ FIXED: Use HTTP instead of HTTPS, and use token from webapp (not generate new one)
+    // Use HTTP and token from webapp
     const verificationLink = `http://${DOMAIN}/v1/user/verify?email=${encodeURIComponent(email)}&token=${token}`;
 
     // Send email via SES
@@ -105,7 +105,7 @@ Thank you for creating an account. Please verify your email address by clicking 
 
 ${verificationLink}
 
-This link will expire in 10 minutes.
+This link will expire in 1 minute.
 
 If you did not create an account, please ignore this email.
 
@@ -141,7 +141,7 @@ CSYE6225 Team`,
     <a href="${verificationLink}" class="button">Verify Email</a>
     <p>Or copy and paste this link into your browser:</p>
     <p style="word-break: break-all; color: #007bff;">${verificationLink}</p>
-    <p><strong>This link will expire in 10 minutes.</strong></p>
+    <p><strong>This link will expire in 1 minute.</strong></p>
     <p>If you did not create an account, please ignore this email.</p>
     <div class="footer">
       <p>Best regards,<br>CSYE6225 Team</p>
