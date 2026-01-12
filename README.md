@@ -1,4 +1,4 @@
-# Serverless Email Verification
+## Serverless Email Verification
 
 Lambda function for sending email verification links when new users register.
 
